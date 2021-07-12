@@ -8,7 +8,7 @@ import requests
 import uuid4
 
 app = Flask(__name__)
-node_id = str(uu)
+node_id = str(uuid4()).replace('-', '')
 
 
 class Blockchain:
