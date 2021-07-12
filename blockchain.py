@@ -15,7 +15,7 @@ class Blockchain:
 		self.chain = []
 		self.transactions = []
 		self.nodes = set()
-
+		self.nodes.add("http://127.0.0.1:81")
 		self.new_block(previous_hash="1", proof=100)
 
 	def new_block(self, proof, previous_hash=None):
@@ -104,13 +104,24 @@ class Blockchain:
 		parsed_url = urlparse(address)
 		if parsed_url.netloc:
 			self.nodes.add(parsed_url.netloc)
-
+            
 		elif parsed_url.path:
 			self.nodes.add(parsed_url.path)
 
 		else:
 			raise ValueError('Invalid URL')
 
+	def get_nodes(self):
+		for node in self.nodes:
+			re = requests.post(f"{node}/serve_nodes")
+			for n in re.text:
+				if n not in self.nodes:
+					nodes = []
+					nodes.append(n)
+					return nodes
+				else:
+					pass
+    
 
 	def proof_of_work(self, last_block):
 
@@ -186,11 +197,10 @@ def full_chain():
     return jsonify(response), 200
 
 
-@app.route('/nodes/register', methods=['POST'])
+@app.route('/register_nodes', methods=['POST'])
 def register_nodes():
-    values = request.get_json()
 
-    nodes = values.get('nodes')
+    nodes = blockchain.get_nodes()
     if nodes is None:
         return "Error: Please supply a valid list of nodes", 400
 
@@ -202,6 +212,11 @@ def register_nodes():
         'total_nodes': list(blockchain.nodes),
     }
     return jsonify(response), 201
+
+@app.route('/serve_nodes', methods=['POST'])
+def serve_nodes():
+    for node in list(blockchain.nodes):
+    	return node, 201
 
 
 @app.route('/nodes/resolve', methods=['GET'])
@@ -230,4 +245,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='0.0.0.0', port=port)
