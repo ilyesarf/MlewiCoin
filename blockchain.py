@@ -57,5 +57,54 @@ class Blockchain:
 	def valid_chain(self, chain): #Check if the chain is valid or not
 
 		last_block  = chain[-1]
-		current_index
+		current_index = block['index']
 
+		while current_index < len(chain):
+			block = chain[current_index]
+			previous_hash = self.hash(last_block)
+			if block['previous_hash'] != previous_hash:
+				return False
+
+			if not self.valid_proof(last_block['proof'], block['proof'], last_block_hash):
+				return False
+
+			last_block = block
+			current_index += 1
+
+		return True
+
+	def resolve_problems(self):
+
+		peers = self.nodes
+		new_chain = None
+
+		max_len = len(self.chain)
+
+		for node in peers:
+			response = requests.get(f'http://{node}/chain')
+
+			if response.status_code == 200:
+				length = response.json()['length']
+				chain = response.json()['chain']
+
+				if length > max_len and self.valid_chain(chain):
+					max_len = length
+					new_chain = chain
+
+		if new_chain:
+			self.chain = new_chain
+			return True
+
+		return False
+
+	def save_node(self, address):
+
+		parsed_url = urlparse(address)
+		if parsed_url.netloc:
+			self.nodes.add(parsed_url.netloc)
+
+		elif parsed_url.path:
+			self.nodes.add(parsed_url.path)
+
+		else:
+			raise ValueError('Invalid URL')
