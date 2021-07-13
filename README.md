@@ -6,6 +6,7 @@ To-Do:
 - *Work on the GUI*
 - *Create the smart-contracts*
 - *Wallet Management System*
+- *Work on blockchain bootstrap node*
 
 Feel free to contribue... Code Big!
 
