@@ -15,7 +15,7 @@ class Blockchain:
 		self.chain = []
 		self.transactions = []
 		self.nodes = set()
-		self.nodes.add("http://127.0.0.1:81")
+		self.nodes.add("http://127.0.0.1:81") #Must Be Changed in case of production
 		self.new_block(previous_hash="1", proof=100)
 
 	def new_block(self, proof, previous_hash=None):
@@ -112,16 +112,17 @@ class Blockchain:
 			raise ValueError('Invalid URL')
 
 	def get_nodes(self):
-		for node in self.nodes:
-			re = requests.post(f"{node}/serve_nodes")
-			for n in re.text:
-				if n not in self.nodes:
-					nodes = []
-					nodes.append(n)
-					return nodes
-				else:
-					pass
-    
+		while True:
+			for node in self.nodes:
+				re = requests.post(f"{node}/serve_nodes")
+				for n in re.text:
+					if n not in self.nodes:
+						nodes = []
+						nodes.append(n)
+						return nodes
+					else:
+						pass
+
 
 	def proof_of_work(self, last_block):
 
@@ -152,11 +153,11 @@ def mine():
 
     # We must receive a reward for finding the proof.
     # The sender is "0" to signify that this node has mined a new coin.
-    blockchain.new_transaction(
+    """blockchain.new_transaction(
         sender="0",
         recipient=node_id,
         amount=1,
-    )
+    )"""
 
     # Forge the new Block by adding it to the chain
     previous_hash = blockchain.hash(last_block)
